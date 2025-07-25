@@ -5,6 +5,8 @@ import { FaCircle } from "react-icons/fa";
 import axios from "axios";
 const host = import.meta.env.VITE_API_HOST;
 import styles from "./Users.module.css";
+import SearchFrom from "../../components/SearchForm";
+import PageNavigation from "../../components/PageNavigation";
 
 //TODO: links to message/goto conversation with users (link to convo if exists, else create then link)
 //TODO: delay only for search change (not page or resultsPerPage)
@@ -21,13 +23,6 @@ function Users() {
   const [error, setError] = useState(null);
   const firstRender = useRef(true);
   const navigate = useNavigate();
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(results.count / query.resultsPerPage),
-  );
-  const pageOffset = 1 + Math.max(0, Math.min(query.page - 6, totalPages - 10));
-  const resultsPerPageOptions = [1, 10, 25, 50];
 
   useEffect(() => {
     let ignore = false;
@@ -76,23 +71,37 @@ function Users() {
     return () => (ignore = true);
   }, [query, navigate]);
 
+  const handleSearchChange = (search) => {
+    setQuery((prev) => ({ ...prev, search, page: 1 }));
+  };
+
+  const handlePrev = () => {
+    setQuery((prev) => ({ ...prev, page: prev.page - 1 }));
+  };
+
+  const handleNext = () => {
+    setQuery((prev) => ({ ...prev, page: prev.page + 1 }));
+  };
+
+  const handleSetPage = (page) => {
+    setQuery((prev) => ({ ...prev, page }));
+  };
+
+  const handleChangeResultsPerPage = (resultsPerPage) => {
+    setQuery((prev) => ({
+      ...prev,
+      resultsPerPage,
+      page: 1,
+    }));
+  };
+
   return (
     <>
       <h1>Users</h1>
-      <form>
-        <div>
-          <label htmlFor="search">Search: </label>
-          <input
-            type="text"
-            name="search"
-            id="search"
-            value={query.search}
-            onChange={(e) =>
-              setQuery((prev) => ({ ...prev, search: e.target.value, page: 1 }))
-            }
-          />
-        </div>
-      </form>
+      <SearchFrom
+        search={query.search}
+        handleSearchChange={handleSearchChange}
+      />
       <p>{results.count} Results</p>
       <ul>
         {results.users.map((user) => (
@@ -109,60 +118,15 @@ function Users() {
           </li>
         ))}
       </ul>
-      <div>
-        {query.page > 1 && (
-          <button
-            onClick={() =>
-              setQuery((prev) => ({ ...prev, page: prev.page - 1 }))
-            }
-          >
-            Prev
-          </button>
-        )}
-        {Array.from({ length: Math.min(10, totalPages) }, (_, i) => (
-          <button
-            key={i}
-            style={
-              i + pageOffset === query.page ? { backgroundColor: "green" } : {}
-            }
-            onClick={() =>
-              setQuery((prev) => ({ ...prev, page: i + pageOffset }))
-            }
-          >
-            {i + pageOffset}
-          </button>
-        ))}
-        {query.page < totalPages && (
-          <button
-            onClick={() =>
-              setQuery((prev) => ({ ...prev, page: prev.page + 1 }))
-            }
-          >
-            Next
-          </button>
-        )}
-      </div>
-      <div>
-        <label htmlFor="resultsPerPage">Results Per Page</label>
-        <select
-          name="resultsPerPage"
-          id="resultsPerPage"
-          value={query.resultsPerPage}
-          onChange={(e) =>
-            setQuery((prev) => ({
-              ...prev,
-              resultsPerPage: e.target.value,
-              page: 1,
-            }))
-          }
-        >
-          {resultsPerPageOptions.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-      </div>
+      <PageNavigation
+        resultsCount={results.count}
+        page={query.page}
+        resultsPerPage={query.resultsPerPage}
+        handlePrev={handlePrev}
+        handleNext={handleNext}
+        handleSetPage={handleSetPage}
+        handleChangeResultsPerPage={handleChangeResultsPerPage}
+      />
     </>
   );
 }
