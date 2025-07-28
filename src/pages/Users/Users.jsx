@@ -11,6 +11,7 @@ import PageNavigation from "../../components/PageNavigation";
 //TODO: links to message/goto conversation with users (link to convo if exists, else create then link)
 //TODO: delay only for search change (not page or resultsPerPage)
 //TODO: do something with isLoading and error (update page nav after response)
+//TODO: don't allow messaging self
 
 function Users() {
   const [query, setQuery] = useState({
@@ -28,9 +29,6 @@ function Users() {
     let ignore = false;
 
     const fetchResults = () => {
-      if (ignore) {
-        return;
-      }
       setIsLoading(true);
       setError(null);
 
@@ -41,9 +39,11 @@ function Users() {
           withCredentials: true,
         })
         .then((resp) => {
+          if (ignore) return;
           setResults(resp.data.results);
         })
         .catch((err) => {
+          if (ignore) return;
           console.log(err);
 
           if (err.response) {
@@ -57,6 +57,7 @@ function Users() {
           }
         })
         .finally(() => {
+          if (ignore) return;
           setIsLoading(false);
         });
     };
@@ -95,6 +96,37 @@ function Users() {
     }));
   };
 
+  const handleMessageClick = (userId) => {
+    setIsLoading(true);
+    setError(null);
+
+    const url = `${host}/thread/find-or-create`;
+    const payload = { recipientIds: [userId] };
+    axios
+      .post(url, payload, {
+        withCredentials: true,
+      })
+      .then((resp) => {
+        navigate(`/conversations/${resp.data.thread.id}`);
+      })
+      .catch((err) => {
+        console.log(err);
+
+        if (err.response) {
+          if (err.response.status === 401) {
+            navigate("/login");
+          } else {
+            setError(err.response.data.error);
+          }
+        } else {
+          setError("Something went wrong. Please try again.");
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
   return (
     <>
       <h1>Users</h1>
@@ -112,7 +144,7 @@ function Users() {
               <FaCircle className={styles.online} />
             )}
             <Link to={`/users/${user.id}`}>{user.username}</Link>{" "}
-            <button>
+            <button onClick={() => handleMessageClick(user.id)}>
               <IoChatbubbleOutline />
             </button>
           </li>
