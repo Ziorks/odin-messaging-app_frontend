@@ -44,6 +44,7 @@ function SiteNavigation({ user }) {
           <Link to={"/"}>Home</Link> <Link to={"/users"}>Users</Link>{" "}
           <Link to={"/conversations"}>Conversations</Link>{" "}
           <span>Welcome back, {user.username}</span>{" "}
+          <Link to={"/my-profile"}>My Profile</Link>{" "}
           <button onClick={handleLogout}>Logout</button>
         </nav>
       )}

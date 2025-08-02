@@ -7,6 +7,7 @@ import User from "../pages/User";
 import Conversations from "../pages/Conversations";
 import Conversation from "../pages/Conversation";
 import Login from "../pages/Login";
+import EditProfile from "../pages/EditProfile";
 import { Outlet } from "react-router-dom";
 
 const routes = [
@@ -31,6 +32,10 @@ const routes = [
           { index: true, element: <Conversations /> },
           { path: ":conversationId", element: <Conversation /> },
         ],
+      },
+      {
+        path: "my-profile",
+        element: <EditProfile />,
       },
     ],
   },
