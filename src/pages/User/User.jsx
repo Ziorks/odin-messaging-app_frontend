@@ -3,9 +3,6 @@ import { useFetchFromAPI, useFindAndGotoThread } from "../../hooks";
 // import styles from "./User.module.css";
 
 function User() {
-  //TODO: do something with isLoading and error
-  //TODO: default profile pic on create or get here if picture is null
-
   const { userId } = useParams();
   const {
     data,
@@ -22,6 +19,8 @@ function User() {
 
   return (
     <>
+      {userIsLoading && <p>Loading...</p>}
+      {userError && <p>{userError}</p>}
       {data && (
         <>
           <table>
@@ -33,7 +32,10 @@ function User() {
               <tr>
                 <th>Avatar</th>
                 <td>
-                  <img src={user.profile.picture} />
+                  <img
+                    src={user.profile.pictureURL}
+                    style={{ width: "100px", height: "100px" }}
+                  />
                 </td>
               </tr>
               <tr>
@@ -50,7 +52,15 @@ function User() {
               </tr>
             </tbody>
           </table>
-          <button onClick={() => findAndGotoThread(user.id)}>Message</button>
+          <div>
+            <button
+              onClick={() => findAndGotoThread(user.id)}
+              disabled={findIsLoading}
+            >
+              Message
+            </button>
+            {findError && <span>{findError}</span>}
+          </div>
         </>
       )}
     </>

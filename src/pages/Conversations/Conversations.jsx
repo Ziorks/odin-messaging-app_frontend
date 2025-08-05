@@ -5,8 +5,6 @@ import PageNavigation from "../../components/PageNavigation";
 import { useSearch } from "../../hooks";
 
 function Conversations() {
-  //TODO: do something with isLoading and error (update page nav after response)
-
   const {
     search,
     page,
@@ -36,6 +34,8 @@ function Conversations() {
         search={search}
         handleSearchChange={queryHandlers.handleSearchChange}
       />
+      {isLoading && <p>Searching...</p>}
+      {error && <p>{error}</p>}
       {results && (
         <>
           <p>{results.count} Results</p>

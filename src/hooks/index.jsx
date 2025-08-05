@@ -51,12 +51,12 @@ export function useFetchFromAPI(path) {
 
 export function useSendMessage(threadId, onSuccess) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState(null);
   const navigate = useNavigate();
 
   const sendMessage = (message) => {
     setIsLoading(true);
-    setError(null);
+    setErrors(null);
 
     const payload = {
       body: message,
@@ -74,8 +74,12 @@ export function useSendMessage(threadId, onSuccess) {
         console.log(err);
         if (err.response?.status === 401) {
           navigate("/login");
+        } else if (err.response?.status === 400) {
+          setErrors(err.response.data.errors);
         } else {
-          setError(err.response?.data?.error || "Something went wrong.");
+          setErrors([
+            { msg: err.response?.data?.error || "Something went wrong." },
+          ]);
         }
       })
       .finally(() => {
@@ -83,7 +87,7 @@ export function useSendMessage(threadId, onSuccess) {
       });
   };
 
-  return { sendMessage, isLoading, error };
+  return { sendMessage, isLoading, errors };
 }
 
 export function useFindAndGotoThread() {
@@ -95,7 +99,7 @@ export function useFindAndGotoThread() {
     setIsLoading(true);
     setError(null);
 
-    const url = `${host}/thread/find-or-create`;
+    const url = `${host}/thread`;
     const payload = { recipientIds: [userId] };
     axios
       .post(url, payload, {
@@ -120,21 +124,30 @@ export function useFindAndGotoThread() {
   return { findAndGotoThread, isLoading, error };
 }
 
+const initialValues = { search: "", page: 1, resultsPerPage: 10 };
 export function useSearch(path) {
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const [resultsPerPage, setResultsPerPage] = useState(10);
+  const [search, setSearch] = useState(initialValues.search);
+  const [page, setPage] = useState(initialValues.page);
+  const [resultsPerPage, setResultsPerPage] = useState(
+    initialValues.resultsPerPage,
+  );
   const [results, setResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const fetchTimeoutRef = useRef(null);
   const abortRef = useRef(null);
-  const prevSearchRef = useRef(search);
   const navigate = useNavigate();
 
   const fetchSearch = useCallback(
-    ({ search, page, resultsPerPage }) => {
+    ({ search, page, resultsPerPage }, onSuccess) => {
+      if (abortRef.current) {
+        abortRef.current();
+        abortRef.current = null;
+      }
+
       const controller = new AbortController();
+      abortRef.current = () => controller.abort();
+
       setIsLoading(true);
       setError(null);
 
@@ -146,6 +159,7 @@ export function useSearch(path) {
         })
         .then((resp) => {
           setResults(resp.data.results);
+          onSuccess?.();
         })
         .catch((err) => {
           if (axios.isCancel(err)) return;
@@ -158,6 +172,7 @@ export function useSearch(path) {
         })
         .finally(() => {
           setIsLoading(false);
+          abortRef.current = null;
         });
 
       return () => {
@@ -168,51 +183,53 @@ export function useSearch(path) {
   );
 
   useEffect(() => {
-    const doAbort = () => {
-      clearTimeout(fetchTimeoutRef.current);
-      if (abortRef.current) {
-        abortRef.current();
-        abortRef.current = null;
-      }
-    };
+    //timeout here so state setters in fetchSearch trigger
+    const timeout = setTimeout(() => {
+      fetchSearch(initialValues);
+    }, 0);
 
-    const doFetch = () => {
-      const cleanup = fetchSearch({ search, page, resultsPerPage });
-      abortRef.current = cleanup;
-      prevSearchRef.current = search;
-    };
-
-    doAbort();
-
-    if (prevSearchRef.current !== search) {
-      fetchTimeoutRef.current = setTimeout(doFetch, 1000);
-    } else {
-      doFetch();
-    }
-
-    return doAbort;
-  }, [fetchSearch, search, page, resultsPerPage]);
+    return () => clearTimeout(timeout);
+  }, [fetchSearch]);
 
   const handleSearchChange = (search) => {
+    clearTimeout(fetchTimeoutRef.current);
+
+    const doFetch = () => {
+      fetchSearch({ search, page: 1, resultsPerPage }, () => {
+        setPage(1);
+      });
+    };
+
     setSearch(search);
-    setPage(1);
+    fetchTimeoutRef.current = setTimeout(doFetch, 1000);
   };
 
   const handlePrev = () => {
-    setPage((prev) => prev - 1);
+    if (isLoading) return;
+    const prevPage = page - 1;
+    fetchSearch({ search, page: prevPage, resultsPerPage }, () =>
+      setPage(prevPage),
+    );
   };
 
   const handleNext = () => {
-    setPage((prev) => prev + 1);
+    if (isLoading) return;
+    const nextPage = page + 1;
+    fetchSearch({ search, page: nextPage, resultsPerPage }, () =>
+      setPage(nextPage),
+    );
   };
 
   const handleSetPage = (page) => {
-    setPage(page);
+    if (isLoading) return;
+    fetchSearch({ search, page, resultsPerPage }, () => setPage(page));
   };
 
   const handleChangeResultsPerPage = (resultsPerPage) => {
-    setPage(1);
-    setResultsPerPage(resultsPerPage);
+    if (isLoading) return;
+    fetchSearch({ search, page: 1, resultsPerPage }, () => {
+      (setPage(1), setResultsPerPage(resultsPerPage));
+    });
   };
 
   const queryHandlers = {
@@ -236,12 +253,16 @@ export function useSearch(path) {
 
 export function useSendUpdate(onSuccess) {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState(null);
   const navigate = useNavigate();
+
+  const clearErrors = () => {
+    setErrors(null);
+  };
 
   const sendUpdate = (path, payload, { multipart = false } = {}) => {
     setIsLoading(true);
-    setError(null);
+    setErrors(null);
 
     if (multipart) {
       const formData = new FormData();
@@ -263,8 +284,12 @@ export function useSendUpdate(onSuccess) {
         console.log(err);
         if (err.response?.status === 401) {
           navigate("/login");
+        } else if (err.response?.status === 400) {
+          setErrors(err.response.data.errors);
         } else {
-          setError(err.response?.data?.error || "Something went wrong.");
+          setErrors([
+            { msg: err.response?.data?.error || "Something went wrong." },
+          ]);
         }
       })
       .finally(() => {
@@ -272,5 +297,5 @@ export function useSendUpdate(onSuccess) {
       });
   };
 
-  return { sendUpdate, isLoading, error };
+  return { sendUpdate, clearErrors, isLoading, errors };
 }

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 const host = import.meta.env.VITE_API_HOST;
 // import styles from "./Register.module.css";
 
@@ -8,12 +9,13 @@ function Register() {
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
+    setErrors(null);
 
     const payload = { username, password, passwordConfirmation };
 
@@ -21,16 +23,18 @@ function Register() {
       .post(`${host}/register`, payload, {
         withCredentials: true,
       })
-      .then((resp) => {
-        console.log(resp);
+      .then(() => {
+        setSuccess(true);
       })
       .catch((err) => {
         console.log(err);
 
-        if (err.response) {
-          setError(err.response.data.error);
+        if (err.response?.status === 400) {
+          setErrors(err.response.data.errors);
         } else {
-          setError("Something went wrong. Please try again.");
+          setErrors([
+            { msg: err.response?.data?.message || "Something went wrong." },
+          ]);
         }
       })
       .finally(() => {
@@ -39,39 +43,56 @@ function Register() {
   };
 
   return (
-    <form onSubmit={handleRegisterSubmit}>
-      <div>
-        <label htmlFor="username">Username: </label>
-        <input
-          type="text"
-          name="username"
-          id="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="password">Password: </label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="passwordConfirmation">Confirm Password: </label>
-        <input
-          type="password"
-          name="passwordConfirmation"
-          id="passwordConfirmation"
-          value={passwordConfirmation}
-          onChange={(e) => setPasswordConfirmation(e.target.value)}
-        />
-      </div>
-      <button type="submit">Login</button>
-    </form>
+    <>
+      {errors && (
+        <ul>
+          {errors.map((error, i) => (
+            <li key={i}>{error.msg}</li>
+          ))}
+        </ul>
+      )}
+      {success ? (
+        <p>
+          Registration successful! Login <Link to={"/login"}>here</Link>
+        </p>
+      ) : (
+        <form onSubmit={handleRegisterSubmit}>
+          <div>
+            <label htmlFor="username">Username: </label>
+            <input
+              type="text"
+              name="username"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="password">Password: </label>
+            <input
+              type="password"
+              name="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div>
+            <label htmlFor="passwordConfirmation">Confirm Password: </label>
+            <input
+              type="password"
+              name="passwordConfirmation"
+              id="passwordConfirmation"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+            />
+          </div>
+          <button type="submit" disabled={isLoading}>
+            Register
+          </button>
+        </form>
+      )}
+    </>
   );
 }
 

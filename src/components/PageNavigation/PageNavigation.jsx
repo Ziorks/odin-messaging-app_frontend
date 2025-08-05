@@ -1,6 +1,12 @@
 // import styles from "./PageNavigation.module.css";
 
-function PageNavigation({ resultsCount, page, resultsPerPage, queryHandlers }) {
+function PageNavigation({
+  resultsCount,
+  page,
+  resultsPerPage,
+  isLoading,
+  queryHandlers,
+}) {
   const resultsPerPageOptions = [1, 10, 25, 50];
   const totalPages = Math.max(1, Math.ceil(resultsCount / resultsPerPage));
   const pageOffset = 1 + Math.max(0, Math.min(page - 6, totalPages - 10));
@@ -8,18 +14,28 @@ function PageNavigation({ resultsCount, page, resultsPerPage, queryHandlers }) {
   return (
     <div>
       <div>
-        {page > 1 && <button onClick={queryHandlers.handlePrev}>Prev</button>}
-        {Array.from({ length: Math.min(10, totalPages) }, (_, i) => (
-          <button
-            key={i}
-            style={i + pageOffset === page ? { backgroundColor: "green" } : {}}
-            onClick={() => queryHandlers.handleSetPage(i + pageOffset)}
-          >
-            {i + pageOffset}
+        {page > 1 && (
+          <button onClick={queryHandlers.handlePrev} disabled={isLoading}>
+            Prev
           </button>
-        ))}
+        )}
+        {Array.from({ length: Math.min(10, totalPages) }, (_, i) => {
+          const isCurrentPage = i + pageOffset === page;
+          return (
+            <button
+              key={i}
+              style={isCurrentPage ? { backgroundColor: "green" } : {}}
+              onClick={() => queryHandlers.handleSetPage(i + pageOffset)}
+              disabled={isLoading || isCurrentPage}
+            >
+              {i + pageOffset}
+            </button>
+          );
+        })}
         {page < totalPages && (
-          <button onClick={queryHandlers.handleNext}>Next</button>
+          <button onClick={queryHandlers.handleNext} disabled={isLoading}>
+            Next
+          </button>
         )}
       </div>
       <div>
@@ -31,6 +47,7 @@ function PageNavigation({ resultsCount, page, resultsPerPage, queryHandlers }) {
           onChange={(e) =>
             queryHandlers.handleChangeResultsPerPage(e.target.value)
           }
+          disabled={isLoading}
         >
           {resultsPerPageOptions.map((option, index) => (
             <option key={index} value={option}>

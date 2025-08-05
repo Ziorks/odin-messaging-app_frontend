@@ -9,6 +9,7 @@ function SearchFrom({ search, handleSearchChange }) {
           type="text"
           name="search"
           id="search"
+          autoComplete="off"
           value={search}
           onChange={(e) => handleSearchChange(e.target.value)}
         />

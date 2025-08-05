@@ -27,12 +27,7 @@ function Login() {
       })
       .catch((err) => {
         console.log(err);
-
-        if (err.response) {
-          setError(err.response.data.error);
-        } else {
-          setError("Something went wrong. Please try again.");
-        }
+        setError(err.response?.data?.error || "Something went wrong.");
       })
       .finally(() => {
         setIsLoading(false);
@@ -64,7 +59,9 @@ function Login() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <button type="submit">Login</button>
+        <button type="submit" disabled={isLoading}>
+          Login
+        </button>
       </form>
       <p>
         Need an account? <Link to={"/register"}>Register here</Link>

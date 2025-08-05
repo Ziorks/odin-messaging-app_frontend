@@ -6,8 +6,6 @@ import { useFindAndGotoThread, useSearch } from "../../hooks";
 import SearchFrom from "../../components/SearchForm";
 import PageNavigation from "../../components/PageNavigation";
 
-//TODO: do something with isLoading and error (update page nav after response)
-
 function Users() {
   const {
     search,
@@ -19,11 +17,7 @@ function Users() {
     queryHandlers,
   } = useSearch("/user");
 
-  const {
-    findAndGotoThread,
-    isLoading: findLoading,
-    error: findError,
-  } = useFindAndGotoThread();
+  const { findAndGotoThread } = useFindAndGotoThread();
 
   return (
     <>
@@ -32,6 +26,8 @@ function Users() {
         search={search}
         handleSearchChange={queryHandlers.handleSearchChange}
       />
+      {searchIsLoading && <p>Searching...</p>}
+      {searchError && <p>{searchError}</p>}
       {results && (
         <>
           <p>{results.count} Results</p>
@@ -53,6 +49,7 @@ function Users() {
             resultsCount={results.count}
             page={page}
             resultsPerPage={resultsPerPage}
+            isLoading={searchIsLoading}
             queryHandlers={queryHandlers}
           />
         </>
