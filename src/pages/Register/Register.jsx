@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { GlobalContext } from "../../contexts";
 const host = import.meta.env.VITE_API_HOST;
 // import styles from "./Register.module.css";
 
@@ -11,6 +12,8 @@ function Register() {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState(null);
   const [success, setSuccess] = useState(false);
+  const { user } = useContext(GlobalContext);
+  const navigate = useNavigate();
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
@@ -41,6 +44,12 @@ function Register() {
         setIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [navigate, user]);
 
   return (
     <>

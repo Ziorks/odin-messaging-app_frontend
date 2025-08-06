@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { GlobalContext } from "../../contexts";
 const host = import.meta.env.VITE_API_HOST;
 // import styles from "./Login.module.css";
 
@@ -9,6 +10,7 @@ function Login() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user, refetchUser } = useContext(GlobalContext);
   const navigate = useNavigate();
 
   const handleLoginSubmit = (e) => {
@@ -24,6 +26,7 @@ function Login() {
       })
       .then(() => {
         navigate("/");
+        refetchUser();
       })
       .catch((err) => {
         console.log(err);
@@ -33,6 +36,12 @@ function Login() {
         setIsLoading(false);
       });
   };
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [navigate, user]);
 
   return (
     <>

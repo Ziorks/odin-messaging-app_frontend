@@ -4,17 +4,17 @@ import { GlobalContext } from "./contexts";
 import { useFetchFromAPI } from "./hooks";
 
 function App() {
-  const { data, refetch: refetchUser } = useFetchFromAPI("/user/me");
+  const {
+    data,
+    refetch: refetchUser,
+    reset: clearUser,
+  } = useFetchFromAPI("/user/me");
   const user = data?.user;
 
   return (
-    <GlobalContext.Provider value={{ user, refetchUser }}>
-      {user && (
-        <>
-          <SiteNavigation />
-          <Outlet />
-        </>
-      )}
+    <GlobalContext.Provider value={{ user, refetchUser, clearUser }}>
+      <SiteNavigation />
+      <Outlet />
     </GlobalContext.Provider>
   );
 }

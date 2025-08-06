@@ -7,10 +7,28 @@ export function useFetchFromAPI(path) {
   const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const abortRef = useRef(null);
   const navigate = useNavigate();
 
+  const doAbort = () => {
+    if (abortRef.current) {
+      abortRef.current();
+      abortRef.current = null;
+    }
+  };
+
+  const reset = () => {
+    doAbort();
+    setData(null);
+    setIsLoading(false);
+    setError(null);
+  };
+
   const fetchData = useCallback(() => {
+    doAbort();
+
     const controller = new AbortController();
+    abortRef.current = () => controller.abort();
 
     setIsLoading(true);
     setError(null);
@@ -28,25 +46,22 @@ export function useFetchFromAPI(path) {
         console.log(err);
         if (err.response?.status === 401) {
           navigate("/login");
+          setData(null);
         } else {
           setError(err.response?.data?.error || "Something went wrong.");
         }
       })
       .finally(() => {
         setIsLoading(false);
+        abortRef.current = null;
       });
-
-    return () => {
-      controller.abort();
-    };
   }, [path, navigate]);
 
   useEffect(() => {
-    const cleanup = fetchData();
-    return cleanup;
+    fetchData();
   }, [fetchData]);
 
-  return { data, isLoading, error, refetch: fetchData };
+  return { data, isLoading, error, refetch: fetchData, reset };
 }
 
 export function useSendMessage(threadId, onSuccess) {
@@ -174,16 +189,12 @@ export function useSearch(path) {
           setIsLoading(false);
           abortRef.current = null;
         });
-
-      return () => {
-        controller.abort();
-      };
     },
     [path, navigate],
   );
 
   useEffect(() => {
-    //timeout here so state setters in fetchSearch trigger
+    //timeout is here so state setters in fetchSearch trigger
     const timeout = setTimeout(() => {
       fetchSearch(initialValues);
     }, 0);

@@ -37,15 +37,15 @@ const routes = [
         path: "my-profile",
         element: <EditProfile />,
       },
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "register",
+        element: <Register />,
+      },
     ],
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "register",
-    element: <Register />,
   },
 ];
 
