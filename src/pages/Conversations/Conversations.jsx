@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
-// import styles from "./Conversations.module.css";
+import { formatDistanceToNow } from "date-fns";
 import SearchFrom from "../../components/SearchForm";
 import PageNavigation from "../../components/PageNavigation";
+import ProfilePic from "../../components/ProfilePic";
 import { useSearch } from "../../hooks";
+import styles from "./Conversations.module.css";
 
 function Conversations() {
   const {
@@ -28,7 +30,7 @@ function Conversations() {
   };
 
   return (
-    <>
+    <div className={styles.pageContainer}>
       <h1>Conversations</h1>
       <SearchFrom
         search={search}
@@ -39,12 +41,26 @@ function Conversations() {
       {results && (
         <>
           <p>{results.count} Results</p>
-          <ol>
+          <ol className={styles.resultsList}>
             {results.threads.map((thread) => (
-              <li key={thread.id}>
-                <Link to={`/conversations/${thread.id}`}>
-                  {formatParticipants(thread.participants)}{" "}
-                  {thread.messages[0].body} {thread.messages[0].createdAt}
+              <li key={thread.id} className={styles.resultsItem}>
+                <Link
+                  to={`/conversations/${thread.id}`}
+                  className={styles.conversationLink}
+                >
+                  <ProfilePic
+                    src={thread.participants[0].profile.pictureURL}
+                    size={50}
+                  />
+                  <p>{formatParticipants(thread.participants)}</p>
+                  <div className={styles.messageContainer}>
+                    <p>{thread.messages[0].body}</p>
+                    <p>
+                      {formatDistanceToNow(thread.messages[0].createdAt, {
+                        addSuffix: true,
+                      })}
+                    </p>
+                  </div>
                 </Link>
               </li>
             ))}
@@ -57,7 +73,7 @@ function Conversations() {
           />
         </>
       )}
-    </>
+    </div>
   );
 }
 

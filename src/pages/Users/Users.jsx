@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import { IoChatbubbleOutline } from "react-icons/io5";
-import { FaCircle } from "react-icons/fa";
-import styles from "./Users.module.css";
 import { useFindAndGotoThread, useSearch } from "../../hooks";
 import SearchFrom from "../../components/SearchForm";
 import PageNavigation from "../../components/PageNavigation";
+import styles from "./Users.module.css";
+import ProfilePic from "../../components/ProfilePic/ProfilePic";
 
 function Users() {
   const {
@@ -20,8 +20,8 @@ function Users() {
   const { findAndGotoThread } = useFindAndGotoThread();
 
   return (
-    <>
-      <h1>Users</h1>
+    <div className={styles.pageContainer}>
+      <h1>User Search</h1>
       <SearchFrom
         search={search}
         handleSearchChange={queryHandlers.handleSearchChange}
@@ -30,21 +30,37 @@ function Users() {
       {searchError && <p>{searchError}</p>}
       {results && (
         <>
-          <p>{results.count} Results</p>
-          <ul>
-            {results.users.map((user) => (
-              <li key={user.id}>
-                {new Date(user.profile.lastActive) >
-                  Date.now() - 1000 * 60 * 2 && (
-                  <FaCircle className={styles.online} />
-                )}
-                <Link to={`/users/${user.id}`}>{user.username}</Link>{" "}
-                <button onClick={() => findAndGotoThread(user.id)}>
-                  <IoChatbubbleOutline />
-                </button>
-              </li>
-            ))}
-          </ul>
+          <div>
+            <p>{results.count} Results</p>
+            <ul className={styles.resultsList}>
+              {results.users.map((user) => (
+                <li key={user.id} className={styles.resultsItem}>
+                  <Link to={`/users/${user.id}`} className={styles.userLink}>
+                    <div className={styles.userInfo}>
+                      <ProfilePic
+                        src={user.profile.pictureURL}
+                        size={25}
+                        online={
+                          new Date(user.profile.lastActive) >
+                          Date.now() - 1000 * 60 * 2
+                        }
+                      />
+                      {user.username}
+                    </div>
+                  </Link>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      findAndGotoThread(user.id);
+                    }}
+                    className={styles.messageBtn}
+                  >
+                    <IoChatbubbleOutline />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
           <PageNavigation
             resultsCount={results.count}
             page={page}
@@ -54,7 +70,7 @@ function Users() {
           />
         </>
       )}
-    </>
+    </div>
   );
 }
 

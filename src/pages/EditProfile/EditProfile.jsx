@@ -1,9 +1,16 @@
 import { useContext, useRef, useState } from "react";
+import { LuUpload } from "react-icons/lu";
+import { ImCross } from "react-icons/im";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useSendUpdate } from "../../hooks";
 import { GlobalContext } from "../../contexts";
-// import styles from "./EditProfile.module.css";
+import ProfilePic from "../../components/ProfilePic";
+import styles from "./EditProfile.module.css";
 
 function ProfileForm() {
+  //TODO: reset should clear uploaded pic
+  //TODO: render form if user exists
+
   const { user, refetchUser } = useContext(GlobalContext);
   const formRef = useRef();
 
@@ -51,18 +58,38 @@ function ProfileForm() {
           ))}
         </ul>
       )}
-      <form onSubmit={handleProfileSubmit} ref={formRef}>
+      <form
+        onSubmit={handleProfileSubmit}
+        ref={formRef}
+        className={styles.form}
+      >
         <div>
-          <img
-            src={picture.previewURL}
-            style={{ width: "50px", height: "50px" }}
-          />
-          <label htmlFor="picture">Profile Picture: </label>
+          <div className={styles.profilePicContainer}>
+            <ProfilePic src={picture.previewURL} size={100} />
+            <label htmlFor="picture" className={styles.uploadBtn}>
+              <LuUpload />
+            </label>
+            <button
+              className={styles.removeBtn}
+              onClick={(e) => {
+                e.preventDefault();
+                formRef.current.reset();
+                setPicture({
+                  file: null,
+                  previewURL: user.profile.pictureURL, //TODO: should be default profile pic
+                });
+              }}
+              disabled={!picture.file || updateIsLoading}
+            >
+              <ImCross />
+            </button>
+          </div>
           <input
             accept="image/*"
             type="file"
             name="picture"
             id="picture"
+            hidden
             onChange={(e) => {
               const file = e.target.files[0];
               setPicture({
@@ -72,19 +99,6 @@ function ProfileForm() {
             }}
             disabled={updateIsLoading}
           />
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.target.form.reset();
-              setPicture({
-                file: null,
-                previewURL: user.profile.pictureURL,
-              });
-            }}
-            disabled={!picture.file || updateIsLoading}
-          >
-            Remove
-          </button>
         </div>
         <div>
           <label htmlFor="username">Username: </label>
@@ -113,8 +127,8 @@ function ProfileForm() {
         <button
           onClick={(e) => {
             e.preventDefault();
-            formRef.reset();
-            refetchUser();
+            formRef.current.reset();
+            refetchUser(); //TODO:instead of this, reset form states to initial values
           }}
           disabled={!changesMade}
         >
@@ -164,7 +178,7 @@ function PasswordForm() {
           ))}
         </ul>
       )}
-      <form onSubmit={handlePasswordSubmit}>
+      <form onSubmit={handlePasswordSubmit} className={styles.form}>
         <div>
           <label htmlFor="oldPassword">Current Password: </label>
           <input
@@ -210,12 +224,23 @@ function EditProfile() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <>
-      {showPassword ? <PasswordForm /> : <ProfileForm />}
-      <button onClick={() => setShowPassword((prev) => !prev)}>
-        {showPassword ? "Edit Profile" : "Change Password"}
+    <div className={styles.mainContainer}>
+      <button
+        className={styles.formToggleBtn}
+        onClick={() => setShowPassword((prev) => !prev)}
+      >
+        {showPassword ? (
+          <>
+            <FaArrowLeft /> Edit Profile
+          </>
+        ) : (
+          <>
+            Change Password <FaArrowRight />
+          </>
+        )}
       </button>
-    </>
+      {showPassword ? <PasswordForm /> : <ProfileForm />}
+    </div>
   );
 }
 

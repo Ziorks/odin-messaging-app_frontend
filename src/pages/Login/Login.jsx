@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GlobalContext } from "../../contexts";
 const host = import.meta.env.VITE_API_HOST;
-// import styles from "./Login.module.css";
+import styles from "./Login.module.css";
 
 function Login() {
   const [username, setUsername] = useState("");
@@ -44,10 +44,10 @@ function Login() {
   }, [navigate, user]);
 
   return (
-    <>
+    <div className={styles.mainContainer}>
       {isLoading && <p>Loading...</p>}
       {error && <p>{error}</p>}
-      <form onSubmit={handleLoginSubmit}>
+      <form onSubmit={handleLoginSubmit} className={styles.form}>
         <div>
           <label htmlFor="username">Username: </label>
           <input
@@ -75,7 +75,7 @@ function Login() {
       <p>
         Need an account? <Link to={"/register"}>Register here</Link>
       </p>
-    </>
+    </div>
   );
 }
 

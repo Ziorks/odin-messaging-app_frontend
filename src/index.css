@@ -1,7 +1,9 @@
+@import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+
 :root {
   --color-primary: #94a5e2;
   --color-primary-dark: #586286;
-  --color-secondary: #7a3921;
+  /* --color-secondary: #7a3921; */
   --color-accent: #b8d258;
   --color-bg: #04060e;
   --color-text: #eaeef9;
@@ -14,10 +16,11 @@
 }
 
 body {
-  background-color: #333;
-  color: white;
+  font-family: "Rubik", sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text);
 }
 
 a {
-  color: white;
+  color: var(--color-accent);
 }

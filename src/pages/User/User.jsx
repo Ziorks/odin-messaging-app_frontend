@@ -1,6 +1,8 @@
 import { useParams } from "react-router-dom";
+import { format, formatDistanceToNow } from "date-fns";
 import { useFetchFromAPI, useFindAndGotoThread } from "../../hooks";
-// import styles from "./User.module.css";
+import ProfilePic from "../../components/ProfilePic";
+import styles from "./User.module.css";
 
 function User() {
   const { userId } = useParams();
@@ -18,52 +20,46 @@ function User() {
   } = useFindAndGotoThread();
 
   return (
-    <>
+    <div className={styles.container}>
       {userIsLoading && <p>Loading...</p>}
-      {userError && <p>{userError}</p>}
+      {userError && <p className={styles.error}>{userError}</p>}
       {data && (
         <>
-          <table>
-            <tbody>
-              <tr>
-                <th>Username</th>
-                <td>{user.username}</td>
-              </tr>
-              <tr>
-                <th>Avatar</th>
-                <td>
-                  <img
-                    src={user.profile.pictureURL}
-                    style={{ width: "100px", height: "100px" }}
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th>About</th>
-                <td>{user.profile.about}</td>
-              </tr>
-              <tr>
-                <th>Account Created</th>
-                <td>{user.profile.createdAt}</td>
-              </tr>
-              <tr>
-                <th>Last Active</th>
-                <td>{user.profile.lastActive}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div>
-            <button
-              onClick={() => findAndGotoThread(user.id)}
-              disabled={findIsLoading}
-            >
-              Message
-            </button>
-            {findError && <span>{findError}</span>}
+          <div className={styles.userHeader}>
+            <ProfilePic src={user.profile.pictureURL} size={100}></ProfilePic>
+            <h2>{user.username}</h2>
           </div>
+
+          <div>
+            <h3>Bio</h3>
+            <p>{user.profile.about || "There's nothing here..."}</p>
+          </div>
+
+          <div>
+            <h3>Last Seen</h3>
+            <p>
+              {formatDistanceToNow(user.profile.lastActive, {
+                addSuffix: true,
+              })}
+            </p>
+          </div>
+
+          <div>
+            <h3>Account Created</h3>
+            <p>{format(user.profile.createdAt, "PP")}</p>
+          </div>
+
+          <button
+            className={styles.messageBtn}
+            onClick={() => findAndGotoThread(user.id)}
+            disabled={findIsLoading}
+          >
+            Send Message
+          </button>
+          {findError && <span className={styles.error}>{findError}</span>}
         </>
       )}
-    </>
+    </div>
   );
 }
 

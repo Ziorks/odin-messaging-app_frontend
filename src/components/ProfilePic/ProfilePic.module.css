@@ -1,0 +1,6 @@
+.image {
+  display: block;
+  border-radius: 5rem;
+  object-fit: cover;
+  object-position: center center;
+}

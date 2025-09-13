@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { GlobalContext } from "../../contexts";
 const host = import.meta.env.VITE_API_HOST;
-// import styles from "./Register.module.css";
+import styles from "./Register.module.css";
 
 function Register() {
   const [username, setUsername] = useState("");
@@ -52,56 +52,58 @@ function Register() {
   }, [navigate, user]);
 
   return (
-    <>
-      {errors && (
-        <ul>
-          {errors.map((error, i) => (
-            <li key={i}>{error.msg}</li>
-          ))}
-        </ul>
-      )}
+    <div className={styles.mainContainer}>
       {success ? (
         <p>
           Registration successful! Login <Link to={"/login"}>here</Link>
         </p>
       ) : (
-        <form onSubmit={handleRegisterSubmit}>
-          <div>
-            <label htmlFor="username">Username: </label>
-            <input
-              type="text"
-              name="username"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="password">Password: </label>
-            <input
-              type="password"
-              name="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="passwordConfirmation">Confirm Password: </label>
-            <input
-              type="password"
-              name="passwordConfirmation"
-              id="passwordConfirmation"
-              value={passwordConfirmation}
-              onChange={(e) => setPasswordConfirmation(e.target.value)}
-            />
-          </div>
-          <button type="submit" disabled={isLoading}>
-            Register
-          </button>
-        </form>
+        <>
+          {errors && (
+            <ul>
+              {errors.map((error, i) => (
+                <li key={i}>{error.msg}</li>
+              ))}
+            </ul>
+          )}
+          <form onSubmit={handleRegisterSubmit} className={styles.form}>
+            <div>
+              <label htmlFor="username">Username: </label>
+              <input
+                type="text"
+                name="username"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="password">Password: </label>
+              <input
+                type="password"
+                name="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="passwordConfirmation">Confirm Password: </label>
+              <input
+                type="password"
+                name="passwordConfirmation"
+                id="passwordConfirmation"
+                value={passwordConfirmation}
+                onChange={(e) => setPasswordConfirmation(e.target.value)}
+              />
+            </div>
+            <button type="submit" disabled={isLoading}>
+              Register
+            </button>
+          </form>
+        </>
       )}
-    </>
+    </div>
   );
 }
 

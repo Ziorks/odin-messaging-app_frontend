@@ -3,11 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { GlobalContext } from "../../contexts";
 const host = import.meta.env.VITE_API_HOST;
-// import styles from "./SiteNavigation.module.css";
+import ProfilePic from "../ProfilePic/ProfilePic";
+import logo from "../../assets/logo.svg";
+import styles from "./SiteNavigation.module.css";
 
 function SiteNavigation() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
   const { user, clearUser } = useContext(GlobalContext);
   const navigate = useNavigate();
 
@@ -32,28 +35,34 @@ function SiteNavigation() {
       });
   };
 
+  const toggleShowMenu = () => {
+    setShowMenu((prev) => !prev);
+  };
+
   return (
-    <nav>
-      <Link to={"/"}>Home</Link>
+    <nav className={styles.navContainer}>
+      <Link to={"/"}>
+        <img src={logo} style={{ width: "50px" }} />
+      </Link>
+      {isLoading && <p>Logging out...</p>}
+      {error && <p>{error}</p>}
       {user && (
-        <>
-          {" "}
-          <span>
-            Welcome back, {user.username}{" "}
-            <img
-              src={user.profile.pictureURL}
-              style={{ width: "25px", height: "25px" }}
-            />
-          </span>{" "}
-          <Link to={"/users"}>Users</Link>{" "}
-          <Link to={"/conversations"}>Conversations</Link>{" "}
-          <Link to={"/my-profile"}>Edit Profile</Link>{" "}
-          <button onClick={handleLogout} disabled={isLoading}>
-            Logout
+        <div className={styles.dropdown}>
+          <button onClick={toggleShowMenu} className={styles.dropBtn}>
+            <ProfilePic src={user.profile.pictureURL} size={50} />
           </button>
-          {isLoading && <p>Logging out...</p>}
-          {error && <p>{error}</p>}
-        </>
+          <div
+            className={`${styles.dropdownContent} ${showMenu ? styles.show : ""}`}
+            onClick={toggleShowMenu}
+          >
+            <Link to={"/users"}>Users</Link>
+            <Link to={"/conversations"}>Conversations</Link>
+            <Link to={"/my-profile"}>Edit Profile</Link>
+            <button onClick={handleLogout} disabled={isLoading}>
+              Logout
+            </button>
+          </div>
+        </div>
       )}
     </nav>
   );

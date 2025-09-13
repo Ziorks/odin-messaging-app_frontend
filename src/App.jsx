@@ -14,7 +14,9 @@ function App() {
   return (
     <GlobalContext.Provider value={{ user, refetchUser, clearUser }}>
       <SiteNavigation />
-      <Outlet />
+      <main>
+        <Outlet />
+      </main>
     </GlobalContext.Provider>
   );
 }

@@ -1,4 +1,4 @@
-// import styles from "./PageNavigation.module.css";
+import styles from "./PageNavigation.module.css";
 
 function PageNavigation({
   resultsCount,
@@ -12,37 +12,39 @@ function PageNavigation({
   const pageOffset = 1 + Math.max(0, Math.min(page - 6, totalPages - 10));
 
   return (
-    <div>
+    <div className={styles.mainContainer}>
       <div>
-        {page > 1 && (
-          <button onClick={queryHandlers.handlePrev} disabled={isLoading}>
-            Prev
+        <button
+          onClick={queryHandlers.handlePrev}
+          disabled={isLoading || page <= 1}
+          className={styles.btn}
+        >
+          Prev
+        </button>
+        {Array.from({ length: Math.min(10, totalPages) }, (_, i) => (
+          <button
+            key={i}
+            className={styles.btn}
+            onClick={() => queryHandlers.handleSetPage(i + pageOffset)}
+            disabled={isLoading || i + pageOffset === page}
+          >
+            {i + pageOffset}
           </button>
-        )}
-        {Array.from({ length: Math.min(10, totalPages) }, (_, i) => {
-          const isCurrentPage = i + pageOffset === page;
-          return (
-            <button
-              key={i}
-              style={isCurrentPage ? { backgroundColor: "green" } : {}}
-              onClick={() => queryHandlers.handleSetPage(i + pageOffset)}
-              disabled={isLoading || isCurrentPage}
-            >
-              {i + pageOffset}
-            </button>
-          );
-        })}
-        {page < totalPages && (
-          <button onClick={queryHandlers.handleNext} disabled={isLoading}>
-            Next
-          </button>
-        )}
+        ))}
+        <button
+          onClick={queryHandlers.handleNext}
+          disabled={isLoading || page >= totalPages}
+          className={styles.btn}
+        >
+          Next
+        </button>
       </div>
       <div>
         <label htmlFor="resultsPerPage">Results Per Page</label>
         <select
           name="resultsPerPage"
           id="resultsPerPage"
+          className={styles.btn}
           value={resultsPerPage}
           onChange={(e) =>
             queryHandlers.handleChangeResultsPerPage(e.target.value)
