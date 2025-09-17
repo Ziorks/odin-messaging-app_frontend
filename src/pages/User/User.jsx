@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { format, formatDistanceToNow } from "date-fns";
 import { useFetchFromAPI, useFindAndGotoThread } from "../../hooks";
+import { isOnline } from "../../utilities/helperFunctions";
 import ProfilePic from "../../components/ProfilePic";
 import styles from "./User.module.css";
 
@@ -26,7 +27,11 @@ function User() {
       {data && (
         <>
           <div className={styles.userHeader}>
-            <ProfilePic src={user.profile.pictureURL} size={100}></ProfilePic>
+            <ProfilePic
+              src={user.profile.pictureURL}
+              size={100}
+              online={isOnline(user.profile.lastActive)}
+            ></ProfilePic>
             <h2>{user.username}</h2>
           </div>
 

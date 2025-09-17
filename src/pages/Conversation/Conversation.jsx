@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { FiRefreshCw } from "react-icons/fi";
 import { format } from "date-fns";
 import { useFetchFromAPI, useSendMessage, useSendUpdate } from "../../hooks";
+import { isOnline } from "../../utilities/helperFunctions";
 import { GlobalContext } from "../../contexts";
 import ProfilePic from "../../components/ProfilePic";
 import styles from "./Conversation.module.css";
@@ -63,7 +64,11 @@ function Conversation() {
           <ul className={styles.participantsList}>
             {thread.participants.map((participant) => (
               <li key={participant.id} className={styles.participant}>
-                <ProfilePic src={participant.profile.pictureURL} size={40} />
+                <ProfilePic
+                  src={participant.profile.pictureURL}
+                  size={40}
+                  online={participant.profile.lastActive}
+                />
                 {participant.username}
               </li>
             ))}
@@ -76,7 +81,11 @@ function Conversation() {
               const sender = getUserById(senderId);
               return (
                 <li key={id} className={styles.message}>
-                  <ProfilePic src={sender.profile.pictureURL} size={25} />
+                  <ProfilePic
+                    src={sender.profile.pictureURL}
+                    size={25}
+                    online={isOnline(sender.profile.lastActive)}
+                  />
                   <p>
                     <span className={styles.username}>{sender.username}</span>{" "}
                     <span className={styles.subtext}>

@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { useSearch } from "../../hooks";
+import { isOnline } from "../../utilities/helperFunctions";
 import SearchFrom from "../../components/SearchForm";
 import PageNavigation from "../../components/PageNavigation";
 import ProfilePic from "../../components/ProfilePic";
-import { useSearch } from "../../hooks";
 import styles from "./Conversations.module.css";
 
 function Conversations() {
@@ -51,6 +52,7 @@ function Conversations() {
                   <ProfilePic
                     src={thread.participants[0].profile.pictureURL}
                     size={50}
+                    online={isOnline(thread.participants[0].profile.lastActive)}
                   />
                   <p>{formatParticipants(thread.participants)}</p>
                   <div className={styles.messageContainer}>

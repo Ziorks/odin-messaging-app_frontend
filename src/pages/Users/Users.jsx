@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { IoChatbubbleOutline } from "react-icons/io5";
 import { useFindAndGotoThread, useSearch } from "../../hooks";
+import { isOnline } from "../../utilities/helperFunctions";
 import SearchFrom from "../../components/SearchForm";
 import PageNavigation from "../../components/PageNavigation";
 import styles from "./Users.module.css";
@@ -40,10 +41,7 @@ function Users() {
                       <ProfilePic
                         src={user.profile.pictureURL}
                         size={25}
-                        online={
-                          new Date(user.profile.lastActive) >
-                          Date.now() - 1000 * 60 * 2
-                        }
+                        online={isOnline(user.profile.lastActive)}
                       />
                       {user.username}
                     </div>
