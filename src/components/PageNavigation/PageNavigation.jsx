@@ -7,9 +7,18 @@ function PageNavigation({
   isLoading,
   queryHandlers,
 }) {
-  const resultsPerPageOptions = [1, 10, 25, 50];
+  const maxPageDisplay = 5;
+  const resultsPerPageOptions = [10, 25, 50, 100];
   const totalPages = Math.max(1, Math.ceil(resultsCount / resultsPerPage));
-  const pageOffset = 1 + Math.max(0, Math.min(page - 6, totalPages - 10));
+  const pageOffset =
+    1 +
+    Math.max(
+      0,
+      Math.min(
+        page - (Math.floor(maxPageDisplay / 2) + 1),
+        totalPages - maxPageDisplay,
+      ),
+    );
 
   return (
     <div className={styles.mainContainer}>
@@ -21,16 +30,19 @@ function PageNavigation({
         >
           Prev
         </button>
-        {Array.from({ length: Math.min(10, totalPages) }, (_, i) => (
-          <button
-            key={i}
-            className={styles.btn}
-            onClick={() => queryHandlers.handleSetPage(i + pageOffset)}
-            disabled={isLoading || i + pageOffset === page}
-          >
-            {i + pageOffset}
-          </button>
-        ))}
+        {Array.from(
+          { length: Math.min(maxPageDisplay, totalPages) },
+          (_, i) => (
+            <button
+              key={i}
+              className={styles.btn}
+              onClick={() => queryHandlers.handleSetPage(i + pageOffset)}
+              disabled={isLoading || i + pageOffset === page}
+            >
+              {i + pageOffset}
+            </button>
+          ),
+        )}
         <button
           onClick={queryHandlers.handleNext}
           disabled={isLoading || page >= totalPages}
