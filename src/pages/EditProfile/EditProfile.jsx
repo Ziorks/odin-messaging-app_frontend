@@ -8,9 +8,6 @@ import ProfilePic from "../../components/ProfilePic";
 import styles from "./EditProfile.module.css";
 
 function ProfileForm() {
-  //TODO: reset should clear uploaded pic
-  //TODO: render form if user exists
-
   const { user, refetchUser } = useContext(GlobalContext);
   const formRef = useRef();
 
@@ -66,23 +63,26 @@ function ProfileForm() {
         <div>
           <div className={styles.profilePicContainer}>
             <ProfilePic src={picture.previewURL} size={100} />
-            <label htmlFor="picture" className={styles.uploadBtn}>
-              <LuUpload />
-            </label>
-            <button
-              className={styles.removeBtn}
-              onClick={(e) => {
-                e.preventDefault();
-                formRef.current.reset();
-                setPicture({
-                  file: null,
-                  previewURL: user.profile.pictureURL, //TODO: should be default profile pic
-                });
-              }}
-              disabled={!picture.file || updateIsLoading}
-            >
-              <ImCross />
-            </button>
+            {picture.file ? (
+              <button
+                className={styles.removeBtn}
+                onClick={(e) => {
+                  e.preventDefault();
+                  formRef.current.reset();
+                  setPicture({
+                    file: null,
+                    previewURL: user.profile.pictureURL,
+                  });
+                }}
+                disabled={!picture.file || updateIsLoading}
+              >
+                <ImCross />
+              </button>
+            ) : (
+              <label htmlFor="picture" className={styles.uploadBtn}>
+                <LuUpload />
+              </label>
+            )}
           </div>
           <input
             accept="image/*"
@@ -127,8 +127,13 @@ function ProfileForm() {
         <button
           onClick={(e) => {
             e.preventDefault();
+            setUsername(user.username);
+            setAbout(user.profile.about);
+            setPicture({
+              file: null,
+              previewURL: user.profile.pictureURL,
+            });
             formRef.current.reset();
-            refetchUser(); //TODO:instead of this, reset form states to initial values
           }}
           disabled={!changesMade}
         >
@@ -221,25 +226,30 @@ function PasswordForm() {
 }
 
 function EditProfile() {
+  const { user } = useContext(GlobalContext);
   const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className={styles.mainContainer}>
-      <button
-        className={styles.formToggleBtn}
-        onClick={() => setShowPassword((prev) => !prev)}
-      >
-        {showPassword ? (
-          <>
-            <FaArrowLeft /> Edit Profile
-          </>
-        ) : (
-          <>
-            Change Password <FaArrowRight />
-          </>
-        )}
-      </button>
-      {showPassword ? <PasswordForm /> : <ProfileForm />}
+      {user && (
+        <>
+          <button
+            className={styles.formToggleBtn}
+            onClick={() => setShowPassword((prev) => !prev)}
+          >
+            {showPassword ? (
+              <>
+                <FaArrowLeft /> Edit Profile
+              </>
+            ) : (
+              <>
+                Change Password <FaArrowRight />
+              </>
+            )}
+          </button>
+          {showPassword ? <PasswordForm /> : <ProfileForm />}{" "}
+        </>
+      )}
     </div>
   );
 }

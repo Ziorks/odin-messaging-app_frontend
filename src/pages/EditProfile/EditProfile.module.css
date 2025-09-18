@@ -15,6 +15,7 @@
 .uploadBtn,
 .removeBtn {
   position: absolute;
+  right: 0;
   bottom: 0;
   color: var(--color-text);
   border: none;
@@ -28,13 +29,11 @@
 }
 
 .uploadBtn {
-  right: 0;
   background-color: var(--color-primary-dark);
   font-size: 1rem;
 }
 
 .removeBtn {
-  left: 0;
   background-color: red;
   font-size: 0.7rem;
 }
