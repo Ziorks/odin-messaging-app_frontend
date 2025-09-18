@@ -37,7 +37,15 @@
   border-bottom: 0.3rem solid var(--color-primary);
   border-top: 0.3rem solid var(--color-primary);
   height: 70vh;
-  overflow: scroll;
+  overflow-y: scroll;
+}
+
+.messagesList::-webkit-scrollbar {
+  width: 12px;
+}
+
+.messagesList::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
 }
 
 .message {
