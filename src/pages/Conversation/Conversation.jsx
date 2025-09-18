@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FiRefreshCw } from "react-icons/fi";
 import { format } from "date-fns";
 import { useFetchFromAPI, useSendMessage, useSendUpdate } from "../../hooks";
@@ -9,11 +9,6 @@ import ProfilePic from "../../components/ProfilePic";
 import styles from "./Conversation.module.css";
 
 function Conversation() {
-  //TODO: show edits to message in list while editing
-  //TODO: participants at top should be links to profiles
-  //TODO: delete message button?
-  //TODO: move edit button to dropdown?
-
   const [message, setMessage] = useState("");
   const [edit, setEdit] = useState({ messageId: null, body: null });
   const isEditing = edit.messageId !== null;
@@ -63,13 +58,18 @@ function Conversation() {
         <div className={styles.conversationContainer}>
           <ul className={styles.participantsList}>
             {thread.participants.map((participant) => (
-              <li key={participant.id} className={styles.participant}>
-                <ProfilePic
-                  src={participant.profile.pictureURL}
-                  size={40}
-                  online={participant.profile.lastActive}
-                />
-                {participant.username}
+              <li key={participant.id}>
+                <Link
+                  to={`/users/${participant.id}`}
+                  className={styles.participantLink}
+                >
+                  <ProfilePic
+                    src={participant.profile.pictureURL}
+                    size={40}
+                    online={participant.profile.lastActive}
+                  />
+                  {participant.username}
+                </Link>
               </li>
             ))}
           </ul>
@@ -87,7 +87,12 @@ function Conversation() {
                     online={isOnline(sender.profile.lastActive)}
                   />
                   <p>
-                    <span className={styles.username}>{sender.username}</span>{" "}
+                    <Link
+                      to={`/users/${sender.id}`}
+                      className={styles.username}
+                    >
+                      {sender.username}
+                    </Link>{" "}
                     <span className={styles.subtext}>
                       {format(createdAt, "M/d/yy, h:mmaaa")}
                     </span>
